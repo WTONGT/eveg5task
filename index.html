@@ -33,9 +33,68 @@ h2 {
     from { text-shadow: 0 0 10px #007bff; }
     to { text-shadow: 0 0 20px #00aaff; }
 }
+
+/* 折叠价目表 */
+.collapse-price {
+    background: #10101b;
+    border-radius: 14px;
+    margin-bottom: 20px;
+    border: 1px solid #1c1c2e;
+    overflow: hidden;
+}
+.price-header {
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    font-size: 18px;
+    color: #fff;
+}
+.price-header:hover {
+    background: #151525;
+}
+.price-arrow {
+    transition: transform 0.3s;
+}
+.price-arrow.open {
+    transform: rotate(180deg);
+}
+.price-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+}
+.price-body.show {
+    max-height: 500px;
+}
+.price-content {
+    padding: 0 20px 18px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+.price-tag {
+    background: #181828;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    border-left: 3px solid #00aaff;
+    white-space: nowrap;
+}
+.price-tag.zero {
+    border-left-color: #ff4466;
+    background: rgba(255,68,102,0.06);
+}
+.price-tag span {
+    color: #00ff99;
+    font-weight: bold;
+    margin-left: 6px;
+}
+
 textarea {
     width: 100%;
-    height: 260px;
+    height: 220px;
     padding: 16px;
     background: #12121e;
     color: #fff;
@@ -89,6 +148,17 @@ button.gray {
     font-size: 22px;
     color: #fff;
 }
+.section-title {
+    font-size: 18px;
+    margin: 16px 0 12px;
+    color: #ccc;
+    padding-left: 8px;
+    border-left: 4px solid #00aaff;
+}
+.section-title.invalid {
+    color: #ff88a0;
+    border-left-color: #ff4466;
+}
 .result-item {
     background: #181828;
     padding: 16px 20px;
@@ -106,9 +176,9 @@ button.gray {
     transform: translateX(6px);
     box-shadow: 0 5px 15px rgba(0,170,255,0.15);
 }
-.result-item.unknown {
-    border-left-color: #ff2255;
-    background: rgba(255,34,85,0.06);
+.result-item.invalid {
+    border-left-color: #ff4466;
+    background: rgba(255,68,102,0.06);
 }
 .result-item .name {
     font-weight: bold;
@@ -127,6 +197,9 @@ button.gray {
     text-align: right;
     font-size: 16px;
 }
+.result-item.invalid .value {
+    color: #ff6688;
+}
 .total-box {
     background: linear-gradient(135deg, rgba(0,255,128,0.1), rgba(0,255,128,0.03));
     padding: 24px;
@@ -139,6 +212,7 @@ button.gray {
 .total-title {
     font-size: 17px;
     color: #ddd;
+    margin-bottom: 8px;
 }
 .total-num {
     font-size: 32px;
@@ -157,6 +231,18 @@ button.gray {
 <body>
 <div class="container">
     <h2>🌌 任务价值统计</h2>
+
+    <!-- 折叠价目表 -->
+    <div class="collapse-price">
+        <div class="price-header" onclick="togglePrice()">
+            <span>📋 任务价目表</span>
+            <span class="price-arrow" id="priceArrow">▼</span>
+        </div>
+        <div class="price-body" id="priceBody">
+            <div class="price-content" id="priceDisplay"></div>
+        </div>
+    </div>
+
     <textarea id="data" placeholder="粘贴你的任务数据到这里..."></textarea>
     <div class="btn-group">
         <button onclick="run()">开始统计</button>
@@ -166,15 +252,34 @@ button.gray {
 </div>
 
 <script>
-const taskPrices = {
+const taskKeyWords = {
     "7繁殖设施":20,"7天使的愤怒":20,"7净化的火焰":20,"7开拓号":20,
     "7清理门户":20,"7地平线上的萨沙":20,"7灭龙行动":20,"7萨沙取物":20,
     "7重重一螫":30,"7自由间谍":20,"7聚集力量":30,"7地点地点":30,
     "7巨型驱动器":30,"7解放矿工A":30,"7解放矿工C":30,"7袭击护航队A":30,
     "7袭击护航队C":40,"7斩龙行动":0
+};
+
+// 折叠切换
+function togglePrice() {
+    const body = document.getElementById('priceBody');
+    const arrow = document.getElementById('priceArrow');
+    body.classList.toggle('show');
+    arrow.classList.toggle('open');
 }
 
-// 数字动画函数
+// 渲染价目表
+function renderPriceList() {
+    let html = "";
+    for (let key in taskKeyWords) {
+        const name = key.replace(/^7/, "");
+        const price = taskKeyWords[key];
+        const cls = price === 0 ? "zero" : "";
+        html += `<div class="price-tag ${cls}">${name} <span>${price}M</span></div>`;
+    }
+    document.getElementById("priceDisplay").innerHTML = html;
+}
+
 function animateValue(obj, start, end, duration) {
     let startTimestamp = null;
     const step = (timestamp) => {
@@ -187,59 +292,114 @@ function animateValue(obj, start, end, duration) {
     window.requestAnimationFrame(step);
 }
 
-function run(){
-    const text = document.getElementById("data").value
-    const lines = text.split("\n").map(i=>i.trim()).filter(i=>i&&!i.includes("没有物品"))
-
-    const count = {}
-    let totalCount = 0
-    let totalValue = 0
-
-    for(let line of lines){
-        const name = line.split(/\s+/)[0]
-        if(!name) continue
-        count[name] = (count[name]||0)+1
+function run() {
+    const text = document.getElementById("data").value.trim();
+    if (!text) {
+        alert("请粘贴任务数据");
+        return;
     }
 
-    let html = "<h3>📊 统计结果</h3>"
+    const lines = text.split("\n")
+        .map(i => i.trim())
+        .filter(i => i && !i.includes("没有物品"));
 
-    for(let task in count){
-        const num = count[task]
-        const price = taskPrices[task] || 0
-        const val = price * num
-        const isUnknown = taskPrices[task] === undefined
+    const result = {};
+    for (let line of lines) {
+        if(line.startsWith("17") || line.startsWith("27") || line.startsWith("37")) continue;
 
-        html += `
-        <div class="result-item ${isUnknown ? 'unknown' : ''}">
-            <div class="name">${task}</div>
-            <div class="info">${num} 个 × ${price}M</div>
-            <div class="value">${val}M</div>
-        </div>`
+        let matchedKey = null;
+        let matchedPrice = 0;
+        
+        for (let key in taskKeyWords) {
+            if (line.includes(key)) {
+                matchedKey = key;
+                matchedPrice = taskKeyWords[key];
+                break;
+            }
+        }
 
-        totalCount += num
-        totalValue += val
+        if (matchedKey) {
+            if (!result[matchedKey]) result[matchedKey] = { count: 0, price: matchedPrice };
+            result[matchedKey].count++;
+        } else {
+            if (!result["未识别任务"]) result["未识别任务"] = { count: 0, price: 0 };
+            result["未识别任务"].count++;
+        }
+    }
+
+    const validTasks = [];
+    const invalidTasks = [];
+    let totalValidValue = 0;
+    let totalAllCount = 0;
+    let validCount = 0;
+    let invalidCount = 0;
+
+    for (let key in result) {
+        const num = result[key].count;
+        const price = result[key].price;
+        const val = price * num;
+        totalAllCount += num;
+        const displayName = key.replace(/^7/, '');
+        
+        const item = { task: displayName, num, price, val };
+        if (price > 0) {
+            validTasks.push(item);
+            totalValidValue += val;
+            validCount += num;
+        } else {
+            invalidTasks.push(item);
+            invalidCount += num;
+        }
+    }
+
+    let html = "<h3>📊 统计结果</h3>";
+
+    if (validTasks.length > 0) {
+        html += `<div class="section-title">✅ 完成任务 </div>`;
+        for (let { task, num, price, val } of validTasks) {
+            html += `
+            <div class="result-item">
+                <div class="name">${task}</div>
+                <div class="info">${num} 个 × ${price}M</div>
+                <div class="value">${val}M</div>
+            </div>`;
+        }
+    }
+
+    if (invalidTasks.length > 0) {
+        html += `<div class="section-title invalid">❌ 无效地点 </div>`;
+        for (let { task, num, price, val } of invalidTasks) {
+            const reason = price === 0 ? "0价值任务" : "未配置价格";
+            html += `
+            <div class="result-item invalid">
+                <div class="name">${task}</div>
+                <div class="info">${num} 个 × ${price}M（${reason}）</div>
+                <div class="value">${val}M</div>
+            </div>`;
+        }
     }
 
     html += `
     <div class="total-box">
-        <div class="total-title">任务总数：${totalCount} 个</div>
+        <div class="total-title">📦 任务总数：${totalAllCount} 个</div>
+        <div class="total-title">✅ 完成任务：${validCount} 个 ｜ ❌ 无效地点：${invalidCount} 个</div>
         <div class="total-num" id="totalValue">0</div>
-    </div>`
+    </div>`;
 
-    document.getElementById("result").innerHTML = html
-
-    // 启动数字动画
-    const totalEl = document.getElementById("totalValue")
-    animateValue(totalEl, 0, totalValue, 1200)
+    document.getElementById("result").innerHTML = html;
+    const totalEl = document.getElementById("totalValue");
+    animateValue(totalEl, 0, totalValidValue, 1200);
     setTimeout(() => {
-        totalEl.innerHTML = `💰 总价值：${totalValue}M`
-    }, 1250)
+        totalEl.innerHTML = `💰 总报酬：${totalValidValue}M`;
+    }, 1250);
 }
 
-function clearAll(){
-    document.getElementById("data").value = ""
-    document.getElementById("result").innerHTML = ""
+function clearAll() {
+    document.getElementById("data").value = "";
+    document.getElementById("result").innerHTML = "";
 }
+
+window.onload = renderPriceList;
 </script>
 </body>
 </html>
