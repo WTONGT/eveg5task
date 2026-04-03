@@ -2,71 +2,241 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>星区任务价值统计</title>
+<title>任务价值统计</title>
 <style>
-*{box-sizing:border-box}
-body{font-family:Arial;background:#121212;color:#fff;padding:20px}
-.container{max-width:1000px;margin:auto}
-textarea{width:100%;height:240px;padding:10px;background:#222;color:#fff;border:1px solid #555}
-button{padding:10px 20px;margin:10px 5px;background:#007bff;color:#fff;border:none;border-radius:5px;cursor:pointer}
-.stats{background:#1a1a1a;padding:15px;border-radius:8px;margin:20px 0}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-top:10px}
-.item{background:#2a2a2a;padding:10px;border-left:4px solid #007bff}
-.total{font-size:18px;font-weight:bold;color:#00ff7f;margin-top:15px;padding:10px;background:#00ff7f1a;border-radius:5px}
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+body {
+    font-family: "Microsoft YaHei", Arial, sans-serif;
+    background: #080810;
+    color: #e0e0e0;
+    padding: 30px 20px;
+    line-height: 1.6;
+    min-height: 100vh;
+}
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+}
+h2 {
+    text-align: center;
+    margin-bottom: 24px;
+    font-size: 28px;
+    color: #fff;
+    text-shadow: 0 0 15px rgba(0, 123, 255, 0.4);
+    animation: glow 2s infinite alternate;
+}
+@keyframes glow {
+    from { text-shadow: 0 0 10px #007bff; }
+    to { text-shadow: 0 0 20px #00aaff; }
+}
+textarea {
+    width: 100%;
+    height: 260px;
+    padding: 16px;
+    background: #12121e;
+    color: #fff;
+    border: 1px solid #2a2a3a;
+    border-radius: 14px;
+    font-size: 15px;
+    resize: vertical;
+    outline: none;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.4);
+}
+textarea:focus {
+    border-color: #00aaff;
+    box-shadow: 0 0 0 3px rgba(0, 170, 255, 0.2), 0 0 15px rgba(0,170,255,0.1);
+}
+.btn-group {
+    display: flex;
+    gap: 12px;
+    margin: 18px 0;
+    justify-content: center;
+}
+button {
+    padding: 12px 32px;
+    background: linear-gradient(135deg, #0088ff, #00ccff);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 15px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 5px 15px rgba(0, 136, 255, 0.3);
+}
+button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 136, 255, 0.45);
+}
+button.gray {
+    background: linear-gradient(135deg, #3a3a50, #4a4a65);
+}
+.stats {
+    background: #10101b;
+    padding: 26px;
+    border-radius: 18px;
+    margin: 20px 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border: 1px solid #1c1c2e;
+}
+.stats h3 {
+    margin-bottom: 20px;
+    font-size: 22px;
+    color: #fff;
+}
+.result-item {
+    background: #181828;
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 6px solid #00aaff;
+    transition: 0.3s;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.2);
+}
+.result-item:hover {
+    background: #202035;
+    transform: translateX(6px);
+    box-shadow: 0 5px 15px rgba(0,170,255,0.15);
+}
+.result-item.unknown {
+    border-left-color: #ff2255;
+    background: rgba(255,34,85,0.06);
+}
+.result-item .name {
+    font-weight: bold;
+    min-width: 190px;
+    font-size: 15px;
+}
+.result-item .info {
+    color: #a0a0c0;
+    flex: 1;
+    text-align: center;
+}
+.result-item .value {
+    color: #00ff99;
+    font-weight: bold;
+    min-width: 110px;
+    text-align: right;
+    font-size: 16px;
+}
+.total-box {
+    background: linear-gradient(135deg, rgba(0,255,128,0.1), rgba(0,255,128,0.03));
+    padding: 24px;
+    border-radius: 16px;
+    margin-top: 28px;
+    text-align: center;
+    border: 1px solid rgba(0,255,128,0.15);
+    box-shadow: 0 0 20px rgba(0,255,128,0.1);
+}
+.total-title {
+    font-size: 17px;
+    color: #ddd;
+}
+.total-num {
+    font-size: 32px;
+    font-weight: bold;
+    color: #00ff99;
+    margin-top: 10px;
+    text-shadow: 0 0 15px rgba(0,255,128,0.4);
+    animation: numberGlow 2s infinite alternate;
+}
+@keyframes numberGlow {
+    from { text-shadow: 0 0 10px #00ff99; }
+    to { text-shadow: 0 0 25px #00ff99; }
+}
 </style>
 </head>
 <body>
 <div class="container">
-    <h2>🌌 星区任务价值统计（GitHub Pages 版）</h2>
-    <textarea id="data" placeholder="粘贴你的任务数据："></textarea>
-    <br>
-    <button onclick="run()">开始统计</button>
-    <button onclick="clearAll()">清空</button>
-
+    <h2>🌌 任务价值统计</h2>
+    <textarea id="data" placeholder="粘贴你的任务数据到这里..."></textarea>
+    <div class="btn-group">
+        <button onclick="run()">开始统计</button>
+        <button class="gray" onclick="clearAll()">清空内容</button>
+    </div>
     <div class="stats" id="result"></div>
 </div>
 
 <script>
-// 任务价值配置
 const taskPrices = {
-    "7重重一螫": 100,
-    "7解放矿工C": 120,
-    "7解放矿工A": 110,
-    "7袭击护航队C": 90,
-    "7聚集力量": 130,
-    "7繁殖设施": 150,
-    "7清理门户": 140,
-    "7巨型驱动器": 160
+    "7繁殖设施":20,"7天使的愤怒":20,"7净化的火焰":20,"7开拓号":20,
+    "7清理门户":20,"7地平线上的萨沙":20,"7灭龙行动":20,"7萨沙取物":20,
+    "7重重一螫":30,"7自由间谍":20,"7聚集力量":30,"7地点地点":30,
+    "7巨型驱动器":30,"7解放矿工A":30,"7解放矿工C":30,"7袭击护航队A":30,
+    "7袭击护航队C":40,"7斩龙行动":0
 }
 
-function run() {
+// 数字动画函数
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        const value = Math.floor(progress * (end - start) + start);
+        obj.innerHTML = value;
+        if (progress < 1) window.requestAnimationFrame(step);
+    };
+    window.requestAnimationFrame(step);
+}
+
+function run(){
     const text = document.getElementById("data").value
-    const lines = text.split("\n").map(i => i.trim()).filter(i => i && !i.includes("没有物品"))
+    const lines = text.split("\n").map(i=>i.trim()).filter(i=>i&&!i.includes("没有物品"))
 
     const count = {}
     let totalCount = 0
     let totalValue = 0
 
-    for (let line of lines) {
+    for(let line of lines){
         const name = line.split(/\s+/)[0]
-        if (!name) continue
-        count[name] = (count[name] || 0) + 1
+        if(!name) continue
+        count[name] = (count[name]||0)+1
     }
 
-    let html = "<h3>📊 统计结果</h3><div class='grid'>"
-    for (let task in count) {
+    let html = "<h3>📊 统计结果</h3>"
+
+    for(let task in count){
         const num = count[task]
-        const val = (taskPrices[task] || 0) * num
-        html += `<div class='item'><b>${task}</b><br>数量：${num} | 价值：${val}</div>`
+        const price = taskPrices[task] || 0
+        const val = price * num
+        const isUnknown = taskPrices[task] === undefined
+
+        html += `
+        <div class="result-item ${isUnknown ? 'unknown' : ''}">
+            <div class="name">${task}</div>
+            <div class="info">${num} 个 × ${price}M</div>
+            <div class="value">${val}M</div>
+        </div>`
+
         totalCount += num
         totalValue += val
     }
-    html += "</div>"
-    html += `<div class='total'>✅ 总计：任务 ${totalCount} 个 | 总价值 ${totalValue}</div>`
+
+    html += `
+    <div class="total-box">
+        <div class="total-title">任务总数：${totalCount} 个</div>
+        <div class="total-num" id="totalValue">0</div>
+    </div>`
+
     document.getElementById("result").innerHTML = html
+
+    // 启动数字动画
+    const totalEl = document.getElementById("totalValue")
+    animateValue(totalEl, 0, totalValue, 1200)
+    setTimeout(() => {
+        totalEl.innerHTML = `💰 总价值：${totalValue}M`
+    }, 1250)
 }
 
-function clearAll() {
+function clearAll(){
     document.getElementById("data").value = ""
     document.getElementById("result").innerHTML = ""
 }
