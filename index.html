@@ -2,152 +2,73 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>EVE G5 合作社管理系统</title>
+<title>星区任务价值统计</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box;font-family:system-ui,sans-serif}
-body{background:#0c151e;color:#e0e6ed}
-.login{position:fixed;top:0;left:0;width:100%;height:100%;background:#0c151e;display:flex;align-items:center;justify-content:center}
-.login-box{background:#151f2e;padding:40px;border-radius:12px;width:100%;max-width:420px}
-.login-box h2{color:#4fd1c7;margin-bottom:24px;text-align:center}
-.login-box input{width:100%;padding:12px 14px;margin:8px 0;background:#1b2838;border:none;border-radius:6px;color:#fff;font-size:15px}
-.login-box button{width:100%;padding:12px;background:#21b498;border:none;border-radius:6px;color:#fff;font-weight:bold;margin-top:12px;cursor:pointer}
-.main{display:none;padding:24px}
-.header{display:flex;justify-content:space-between;align-items:center;background:#151f2e;padding:16px 20px;border-radius:10px;margin-bottom:20px}
-.header h1{color:#4fd1c7;font-size:22px}
-.user{color:#a0b4c8}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
-.stat{background:#151f2e;padding:20px;border-radius:10px;text-align:center}
-.stat .num{font-size:26px;font-weight:bold;color:#4fd1c7;margin-top:8px}
-.stat .label{color:#9cb7d3;font-size:14px}
-.toolbar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap}
-.toolbar input,.toolbar select,.toolbar button{padding:9px 12px;background:#1b2838;border:none;border-radius:6px;color:#fff}
-.toolbar button{background:#21b498;cursor:pointer}
-.table-box{background:#151f2e;padding:20px;border-radius:10px}
-table{width:100%;border-collapse:collapse}
-th{background:#1b2838;color:#4fd1c7;padding:12px;text-align:left}
-td{padding:11px;border-bottom:1px solid #233143}
-tr:hover{background:#1b2838}
+*{box-sizing:border-box}
+body{font-family:Arial;background:#121212;color:#fff;padding:20px}
+.container{max-width:1000px;margin:auto}
+textarea{width:100%;height:240px;padding:10px;background:#222;color:#fff;border:1px solid #555}
+button{padding:10px 20px;margin:10px 5px;background:#007bff;color:#fff;border:none;border-radius:5px;cursor:pointer}
+.stats{background:#1a1a1a;padding:15px;border-radius:8px;margin:20px 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-top:10px}
+.item{background:#2a2a2a;padding:10px;border-left:4px solid #007bff}
+.total{font-size:18px;font-weight:bold;color:#00ff7f;margin-top:15px;padding:10px;background:#00ff7f1a;border-radius:5px}
 </style>
 </head>
-
 <body>
-<div class="login" id="loginPage">
-  <div class="login-box">
-    <h2>G5 合作社登录</h2>
-    <input type="text" id="user" placeholder="账号">
-    <input type="password" id="pwd" placeholder="密码">
-    <button onclick="login()">登录</button>
-  </div>
-</div>
+<div class="container">
+    <h2>🌌 星区任务价值统计（GitHub Pages 版）</h2>
+    <textarea id="data" placeholder="粘贴你的任务数据："></textarea>
+    <br>
+    <button onclick="run()">开始统计</button>
+    <button onclick="clearAll()">清空</button>
 
-<div class="main" id="mainPage">
-  <div class="header">
-    <h1>EVE G5 虫洞合作社管理系统</h1>
-    <div class="user" id="userInfo"></div>
-  </div>
-
-  <div class="stats">
-    <div class="stat"><div class="label">总任务数</div><div class="num">12</div></div>
-    <div class="stat"><div class="label">今日记录</div><div class="num">12</div></div>
-    <div class="stat"><div class="label">BOSS 种类</div><div class="num">6</div></div>
-    <div class="stat"><div class="label">参与角色</div><div class="num">4</div></div>
-  </div>
-
-  <div class="toolbar">
-    <input type="text" id="search" placeholder="搜索任务/BOSS/角色" oninput="search()">
-    <select id="bossFilter" onchange="filter()">
-      <option value="">全部BOSS</option>
-      <option>Bonesaw Breaker</option>
-      <option>Infector of Souls</option>
-      <option>Colenzo the Annihilator</option>
-      <option>Snapchip Shatter</option>
-      <option>Achmel the Cursed</option>
-      <option>Finger Mage</option>
-    </select>
-    <button onclick="exportCSV()">导出 CSV</button>
-  </div>
-
-  <div class="table-box">
-    <table>
-      <thead>
-        <tr>
-          <th>任务名称</th>
-          <th>坐标</th>
-          <th>角色1</th>
-          <th>角色2</th>
-          <th>区域</th>
-          <th>时间</th>
-          <th>目标怪</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody">
-        <tr><td>繁殖设施</td><td>1</td><td>卡维因</td><td>费希培森</td><td>宁静之域</td><td>2026-04-03 12:26</td><td>Bonesaw Breaker</td></tr>
-        <tr><td>繁殖设施</td><td>1</td><td>卡维因</td><td>费希培森</td><td>宁静之域</td><td>2026-04-03 15:07</td><td>Infector of Souls</td></tr>
-        <tr><td>解放矿工A</td><td>0</td><td>埃格斯</td><td>费希培森</td><td>宁静之域</td><td>2026-04-03 14:52</td><td>Colenzo the Annihilator</td></tr>
-        <tr><td>巨型驱动器</td><td>1</td><td>乌法兰特</td><td>费希培森</td><td>宁静之域</td><td>2026-04-03 12:26</td><td>Colenzo the Annihilator</td></tr>
-        <tr><td>巨型驱动器</td><td>1</td><td>乌法兰特</td><td>费希培森</td><td>宁静之域</td><td>2026-04-03 15:25</td><td>Snapchip Shatter</td></tr>
-        <tr><td>清理门户</td><td>1</td><td>乌法兰特</td><td>费希培森</td><td>宁静之域</td><td>2026-04-03 14:58</td><td>Achmel the Cursed</td></tr>
-        <tr><td>聚集力量</td><td>1</td><td>乌法兰特</td><td>费希培森</td><td>宁静之域</td><td>2026-04-03 12:31</td><td>Infector of Souls</td></tr>
-        <tr><td>聚集力量</td><td>1</td><td>乌法兰特</td><td>费希培森</td><td>宁静之域</td><td>2026-04-03 14:30</td><td>Snapchip Shatter</td></tr>
-        <tr><td>袭击护航队C</td><td>1</td><td>乌法兰特</td><td>费希培森</td><td>宁静之域</td><td>2026-04-03 10:10</td><td>Finger Mage</td></tr>
-        <tr><td>袭击护航队C</td><td>1</td><td>乌法兰特</td><td>费希培森</td><td>宁静之域</td><td>2026-04-03 14:09</td><td>Finger Mage</td></tr>
-        <tr><td>解放矿工C</td><td>1</td><td>乌法兰特</td><td>费希培森</td><td>宁静之域</td><td>2026-04-03 12:26</td><td>Achmel the Cursed</td></tr>
-        <tr><td>重重一螫</td><td>1</td><td>乌法兰特</td><td>费希培森</td><td>宁静之域</td><td>2026-04-03 13:10</td><td>Bonesaw Breaker</td></tr>
-      </tbody>
-    </table>
-  </div>
+    <div class="stats" id="result"></div>
 </div>
 
 <script>
-// 默认账号密码
-const USER = "g5admin"
-const PASS = "eve123"
-
-function login() {
-  let u = document.getElementById("user").value
-  let p = document.getElementById("pwd").value
-  if (u === USER && p === PASS) {
-    document.getElementById("loginPage").style.display = "none"
-    document.getElementById("mainPage").style.display = "block"
-    document.getElementById("userInfo").innerText = "当前用户："+u
-    localStorage.setItem("logined", "1")
-  } else {
-    alert("账号或密码错误")
-  }
+// 任务价值配置
+const taskPrices = {
+    "7重重一螫": 100,
+    "7解放矿工C": 120,
+    "7解放矿工A": 110,
+    "7袭击护航队C": 90,
+    "7聚集力量": 130,
+    "7繁殖设施": 150,
+    "7清理门户": 140,
+    "7巨型驱动器": 160
 }
 
-function search() {
-  let kw = document.getElementById("search").value.toLowerCase()
-  let rows = document.querySelectorAll("#tableBody tr")
-  rows.forEach(r => {
-    r.style.display = r.innerText.toLowerCase().includes(kw) ? "" : "none"
-  })
+function run() {
+    const text = document.getElementById("data").value
+    const lines = text.split("\n").map(i => i.trim()).filter(i => i && !i.includes("没有物品"))
+
+    const count = {}
+    let totalCount = 0
+    let totalValue = 0
+
+    for (let line of lines) {
+        const name = line.split(/\s+/)[0]
+        if (!name) continue
+        count[name] = (count[name] || 0) + 1
+    }
+
+    let html = "<h3>📊 统计结果</h3><div class='grid'>"
+    for (let task in count) {
+        const num = count[task]
+        const val = (taskPrices[task] || 0) * num
+        html += `<div class='item'><b>${task}</b><br>数量：${num} | 价值：${val}</div>`
+        totalCount += num
+        totalValue += val
+    }
+    html += "</div>"
+    html += `<div class='total'>✅ 总计：任务 ${totalCount} 个 | 总价值 ${totalValue}</div>`
+    document.getElementById("result").innerHTML = html
 }
 
-function filter() {
-  let v = document.getElementById("bossFilter").value
-  let rows = document.querySelectorAll("#tableBody tr")
-  rows.forEach(r => {
-    let boss = r.children[6].innerText
-    r.style.display = !v || boss == v ? "" : "none"
-  })
-}
-
-function exportCSV() {
-  let rows = document.querySelectorAll("table tr")
-  let csv = Array.from(rows).map(r => 
-    Array.from(r.children).map(c => `"${c.innerText.replace(/"/g, '""')}"`).join(",")
-  ).join("\n")
-  let blob = new Blob([csv], {type:"text/csv"})
-  let a = document.createElement("a")
-  a.href = URL.createObjectURL(blob)
-  a.download = "G5合作社数据.csv"
-  a.click()
-}
-
-if(localStorage.getItem("logined")==="1"){
-  document.getElementById("loginPage").style.display="none"
-  document.getElementById("mainPage").style.display="block"
+function clearAll() {
+    document.getElementById("data").value = ""
+    document.getElementById("result").innerHTML = ""
 }
 </script>
 </body>
