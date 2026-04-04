@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>任务价值统计</title>
+<title>7号任务报酬统计</title>
 <style>
 /* 全局重置与变量 */
 * {
@@ -179,12 +179,12 @@ button.gray {
 </head>
 <body>
 
-<div class="title">📊 任务价值统计</div>
+<div class="title">📊 任务报酬统计</div>
 
 <!-- 价目表 -->
 <div class="price-panel">
   <div class="panel-header" onclick="togglePanel()">
-    <span>任务价目表</span>
+    <span>任务价目表(2026/4/4更新)</span>
     <span>▼</span>
   </div>
   <div class="panel-body" id="priceBody">
@@ -195,7 +195,7 @@ button.gray {
 <!-- 输入 -->
 <textarea id="input" placeholder="在地点里选中所有完成的任务地点Ctrl+C，然后在这里Ctrl+V..模糊识别7+任务名称"></textarea>
 <div class="btn-group">
-  <button onclick="start()">统计</button>
+  <button onclick="start()">提交</button>
   <button class="gray" onclick="clearAll()">清空</button>
 </div>
 
