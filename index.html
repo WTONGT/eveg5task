@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>7号任务报酬统计</title>
+<title>7号任务报酬</title>
 <style>
 /* 全局重置与变量 */
 * {
@@ -179,7 +179,7 @@ button.gray {
 </head>
 <body>
 
-<div class="title">📊 任务报酬统计</div>
+<div class="title">📊 7号任务报酬统计</div>
 
 <!-- 价目表 -->
 <div class="price-panel">
@@ -193,7 +193,7 @@ button.gray {
 </div>
 
 <!-- 输入 -->
-<textarea id="input" placeholder="在地点里选中所有完成的任务地点Ctrl+C，然后在这里Ctrl+V..模糊识别7+任务名称"></textarea>
+<textarea id="input" placeholder="在地点里选中所有完成的任务地点Ctrl+C，然后在这里Ctrl+V..可模糊识别7+任务名称"></textarea>
 <div class="btn-group">
   <button onclick="start()">提交</button>
   <button class="gray" onclick="clearAll()">清空</button>
@@ -286,7 +286,7 @@ function showResult(ok, no, val, cnt, okc, noc) {
   let h = `<div class="result-title">统计结果</div>`;
 
   if (ok.length) {
-    h += `<div class="section"><div class="section-head">✅ 有效任务</div>`;
+    h += `<div class="section"><div class="section-head">✅ 7号任务</div>`;
     ok.forEach(i => {
       h += `<div class="item"><div>${i.n} (${i.c}×${i.p}M)</div><div class="val">${i.v}M</div></div>`;
     });
@@ -294,7 +294,7 @@ function showResult(ok, no, val, cnt, okc, noc) {
   }
 
   if (no.length) {
-    h += `<div class="section"><div class="section-head err">❌ 无效任务</div>`;
+    h += `<div class="section"><div class="section-head err">❌ 其他任务或地点</div>`;
     no.forEach(i => {
       h += `<div class="item err"><div>${i.n} (${i.c}×${i.p}M)</div><div class="val">${i.v}M</div></div>`;
     });
@@ -303,7 +303,7 @@ function showResult(ok, no, val, cnt, okc, noc) {
 
   h += `
   <div class="total">
-    <div>总计 ${cnt} 个 · 有效 ${okc} 个 · 无效 ${noc} 个</div>
+    <div>总计地点 ${cnt} 个 · 7号任务 ${okc} 个 · 其他任务或地点 ${noc} 个</div>
     <div class="num" id="total">0</div>
   </div>`;
 
