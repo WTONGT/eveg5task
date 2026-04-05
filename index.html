@@ -2,190 +2,220 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<title>任务报酬统计</title>
+<title>五级任务报酬统计</title>
 <style>
 :root {
-  --blue: #3a86ff;
-  --green: #38b000;
-  --red: #ff5757;
-  --gray: #6c7c7d;
-  --light: #f8f9fa;
+  --primary: #3a86ff;
+  --success: #38b000;
+  --danger: #ff5757;
+  --light: #f7f8fa;
   --white: #fff;
-  --radius: 12px;
+  --radius: 8px;
+  --shadow: 0 2px 8px rgba(0,0,0,0.04);
 }
+
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
-  font-family: "Microsoft YaHei", sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
 }
+
 body {
   background: var(--light);
-  max-width: 780px;
-  margin: 30px auto;
-  padding: 0 16px;
-  color: #333;
+  max-width: 700px;
+  margin: 20px auto;
+  padding: 0 12px;
+  font-size: 14px;
+  color: #2a2a2a;
 }
+
 .title {
   text-align: center;
-  margin-bottom: 20px;
-  font-size: 22px;
+  margin: 10px 0 16px;
+  font-size: 18px;
+  font-weight: 500;
 }
-.price-panel {
+
+/* 价目表 */
+.price-card {
   background: var(--white);
   border-radius: var(--radius);
-  margin-bottom: 16px;
-  box-shadow: 0 1px 4px #00000008;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
   overflow: hidden;
 }
-.panel-header {
-  padding: 12px 16px;
-  background: #3a86ff0d;
+.price-header {
+  padding: 12px 14px;
+  background: #f8f9fa;
   display: flex;
   justify-content: space-between;
   cursor: pointer;
+  font-weight: 500;
 }
-.panel-body {
+.price-body {
   max-height: 0;
   overflow: hidden;
-  transition: max-height .3s;
+  transition: max-height 0.3s ease;
 }
-.panel-body.show {
-  max-height: 500px;
+.price-body.show {
+  max-height: 1000px;
 }
 .price-grid {
-  padding: 12px;
+  padding: 10px 12px 12px;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 6px;
 }
 .price-item {
-  padding: 6px 10px;
+  padding: 6px 8px;
   background: var(--light);
-  border-radius: 6px;
+  border-radius: 5px;
   font-size: 13px;
   display: flex;
   justify-content: space-between;
 }
 .price-item.zero {
-  color: var(--red);
+  color: var(--danger);
 }
-.price-item span {
-  font-weight: bold;
-}
+
+/* 输入框 */
 textarea {
   width: 100%;
-  height: 150px;
-  padding: 12px;
+  height: 110px;
+  padding: 12px 14px;
   border-radius: var(--radius);
-  border: 1px solid #ddd;
-  font-size: 14px;
-  resize: vertical;
-  margin: 12px 0;
-  outline: 0;
+  border: 1px solid #eee;
+  font-size: 13px;
+  resize: none;
+  margin-bottom: 14px;
+  outline: none;
+  background: var(--white);
+  box-shadow: var(--shadow);
 }
 textarea:focus {
-  border-color: var(--blue);
+  border-color: var(--primary);
 }
-.btn-group {
+
+/* 按钮 */
+.btns {
   display: flex;
   gap: 10px;
   justify-content: center;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
 }
 button {
-  padding: 8px 24px;
-  border-radius: 8px;
+  padding: 9px 20px;
+  border-radius: 6px;
   border: none;
-  background: var(--blue);
+  background: var(--primary);
   color: #fff;
   cursor: pointer;
+  font-size: 14px;
+  transition: opacity 0.2s;
+}
+button:hover{
+  opacity: 0.9;
 }
 button.gray {
-  background: var(--gray);
+  background: #86909c;
 }
+
+/* 结果区域 */
 .result-title {
   text-align: center;
-  margin-bottom: 16px;
-  font-size: 18px;
+  margin-bottom: 14px;
+  font-size: 16px;
+  font-weight: 500;
 }
-.card-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
-}
-.user-card {
+
+.user-box {
   background: var(--white);
-  border-radius: 12px;
+  border-radius: var(--radius);
   padding: 14px;
-  box-shadow: 0 1px 4px #00000008;
-}
-.card-head {
-  font-weight: bold;
   margin-bottom: 10px;
-  text-align: center;
+  box-shadow: var(--shadow);
 }
-.card-item {
-  font-size: 12px;
-  padding: 4px 0;
+.user-head {
+  font-weight: 500;
+  margin-bottom: 10px;
   display: flex;
   justify-content: space-between;
-  border-bottom: 1px dashed #eee;
-  margin-bottom: 4px;
+  align-items: center;
 }
-.card-item .val {
-  color: var(--green);
+.user-head.fold {
+  cursor: pointer;
+}
+.toggle-text {
+  font-size: 13px;
+  color: var(--primary);
+  font-weight: normal;
+}
+
+.task-list {
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  max-height: 2000px;
+}
+.task-list.hide {
+  max-height: 0 !important;
+}
+
+.task-row {
+  font-size: 13px;
+  padding: 7px 0;
+  border-bottom: 1px dashed #f2f2f2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.task-row .name { flex: 2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.task-row .info { flex: 3; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.task-row .price { flex: 0 0 50px; text-align: right; font-weight: bold; color: var(--success); }
+
+.user-total {
+  margin-top: 10px;
   font-weight: bold;
+  color: var(--success);
+  text-align: right;
 }
-.card-item.unknown {
-  color: var(--red) !important;
-  font-weight: bold;
-}
-.card-total {
-  margin-top: 8px;
-  padding: 10px;
-  background: var(--green);
-  color: #fff;
-  text-align: center;
-  border-radius: 6px;
-  font-weight: bold;
-}
+
 .total-all {
-  margin-top: 20px;
-  padding: 16px;
-  background: var(--green);
+  margin-top: 16px;
+  padding: 12px;
+  background: var(--success);
   color: #fff;
   text-align: center;
-  border-radius: 12px;
-  font-size: 20px;
-  font-weight: bold;
+  border-radius: var(--radius);
+  font-size: 16px;
+  font-weight: 500;
 }
 </style>
 </head>
+
 <body>
+<div class="title">📊 五级任务报酬统计</div>
 
-<div class="title">📊 任务报酬统计</div>
-
-<div class="price-panel">
-  <div class="panel-header" onclick="togglePanel()">
+<div class="price-card">
+  <div class="price-header" onclick="togglePrice()">
     <span>任务价目表</span>
-    <span id="arrow">▼</span>
+    <span id="arr">▼</span>
   </div>
-  <div class="panel-body" id="priceBody">
+  <div class="price-body" id="priceBody">
     <div class="price-grid" id="priceGrid"></div>
   </div>
 </div>
 
-<textarea id="input" placeholder="在地点里选中所有完成的任务地点Ctrl+C，然后在这里Ctrl+V..可模糊识别数字+任务名称关键字"></textarea>
-<div class="btn-group">
-  <button onclick="calculate()">提交</button>
-  <button class="gray" onclick="clearAll()">清空</button>
+<textarea id="input" placeholder="在地点里选中所有完成的任务地点Ctrl+C，然后在这里Ctrl+V...可模糊识别数字+任务名称关键字"></textarea>
+<div class="btns">
+  <button onclick="calc()">提交统计</button>
+  <button class="gray" onclick="clearAll()">清空内容</button>
 </div>
 
 <div id="result"></div>
 
 <script>
-// 任务价格配置
+// ======================任务识别配置
 const TASK_PRICE = {
   "繁殖设施":20,"天使的愤怒":20,"净化的火焰":20,"开拓号":20,
   "清理门户":20,"地平线上的萨沙":20,"灭龙行动":20,"萨沙取物":20,
@@ -193,9 +223,7 @@ const TASK_PRICE = {
   "解放矿工A":25,"解放矿工C":25,"袭击护航队A":35,"袭击护航队C":40,
   "地点地点":25,"斩龙行动":0
 };
-
-// 关键词匹配
-const KEYWORD_MAP = {
+const KEY_MAP = {
   "繁殖":"繁殖设施","设施":"繁殖设施","天使":"天使的愤怒","愤怒":"天使的愤怒",
   "净化":"净化的火焰","火焰":"净化的火焰","开拓":"开拓号","清理":"清理门户",
   "门户":"清理门户","地平":"地平线上的萨沙","地平线":"地平线上的萨沙",
@@ -214,8 +242,6 @@ const KEYWORD_MAP = {
   "护航队":"袭击护航队A","袭击":"袭击护航队A","护航":"袭击护航队A",
   "地点":"地点地点","斩龙":"斩龙行动"
 };
-
-// 老板昵称映射
 const BOSS_NAME = {
   "1":"长文白","2":"拜登","3":"破风","4":"东东","5":"阴空",
   "6":"恶鬼","7":"9527","8":"佛狸","9":"千千岩","10":"星空双鱼",
@@ -224,105 +250,120 @@ const BOSS_NAME = {
   "12345":"张三","11223":"王五","44556":"赵六"
 };
 
-// 初始化
-window.onload = renderPriceList;
-
-// 渲染价目表
-function renderPriceList() {
-  const grid = document.getElementById('priceGrid');
-  grid.innerHTML = Object.entries(TASK_PRICE)
-    .map(([name, price]) => `
-      <div class="price-item ${price === 0 ? 'zero' : ''}">
-        ${name} <span>${price}M</span>
-      </div>
-    `).join('');
-}
-
-// 展开/收起面板
-function togglePanel() {
-  const body = document.getElementById('priceBody');
-  const arrow = document.getElementById('arrow');
-  body.classList.toggle('show');
-  arrow.textContent = body.classList.contains('show') ? '▲' : '▼';
-}
-
-// 任务识别
-function getTaskName(line) {
-  for (const [key, task] of Object.entries(KEYWORD_MAP)) {
-    if (line.includes(key)) return task;
+// ====================== 工具函数
+const getTask = line => { 
+  for(const [k,t] of Object.entries(KEY_MAP)) {
+    if(line.includes(k)) return t;
   }
-  return '未识别';
+  return "未识别";
+};
+
+const getLoc = line => { 
+  if(line.includes("埃格斯"))return"埃格斯";
+  if(line.includes("乌法兰特"))return"乌法兰特";
+  if(line.includes("达斯顿斯"))return"达斯顿斯";
+  if(line.includes("卡维因"))return"卡维因";
+  return"未知";
+};
+
+const getUid = line => { 
+  let id = line.match(/-(\d+)/)?.[1] || line.match(/^(\d+)/)?.[1] || "未识别";
+  if(id!=="未识别" && Number(id)>100) return "未识别";
+  return id;
+};
+
+// ====================== 初始化
+window.onload = () => {
+  const g = document.getElementById("priceGrid");
+  g.innerHTML = Object.entries(TASK_PRICE).map(([n,p])=>
+    `<div class="price-item ${p===0?"zero":""}">${n}<span>${p}M</span></div>`
+  ).join("");
+  togglePrice(); // 默认展开价目表
+};
+
+// 价目表展开/收起
+function togglePrice(){
+  const b = document.getElementById("priceBody");
+  b.classList.toggle("show");
+  document.getElementById("arr").textContent = b.classList.contains("show")?"▲":"▼";
+}
+
+// 任务列表折叠
+function toggle(id){
+  const list = document.getElementById("list-"+id);
+  const text = document.getElementById("txt-"+id);
+  list.classList.toggle("hide");
+  text.textContent = list.classList.contains("hide")?"展开":"收起";
 }
 
 // 计算统计
-function calculate() {
-  const text = document.getElementById('input').value.trim();
-  if (!text) return alert('请输入数据');
+function calc(){
+  const text = document.getElementById("input").value.trim();
+  if(!text) {
+    alert("请粘贴任务地点数据后再提交！");
+    return;
+  }
 
-  const userData = {};
-  let totalIncome = 0;
+  const user = {};
+  let totalAll = 0;
 
-  text.split('\n').map(line => line.trim()).filter(Boolean).forEach(line => {
-    const uid = line.match(/^(\d+)/)?.[1] || '未识别';
-    const task = getTaskName(line);
+  text.split("\n").map(i=>i.trim()).filter(Boolean).forEach(line=>{
+    const uid = getUid(line);
+    const task = getTask(line);
+    const loc = getLoc(line);
+    const detail = line.split("*")[3] || "无";
     const price = TASK_PRICE[task] || 0;
 
-    // 初始化用户数据
-    if (!userData[uid]) userData[uid] = { total: 0, tasks: {} };
-    if (!userData[uid].tasks[task]) userData[uid].tasks[task] = { count: 0, price };
-
-    // 累加数据
-    userData[uid].tasks[task].count++;
-    userData[uid].total += price;
-    totalIncome += price;
+    if(!user[uid]) {
+      user[uid] = { total:0, list:[] };
+    }
+    
+    user[uid].list.push({ task, loc, detail, price });
+    user[uid].total += price;
+    totalAll += price;
   });
 
-  renderResult(userData, totalIncome);
+  renderResult(user, totalAll);
 }
 
 // 渲染结果
-function renderResult(userData, totalIncome) {
-  let html = `
-    <div class="result-title">💰 老板报酬统计</div>
-    <div class="card-container">
-  `;
+function renderResult(userMap, allTotal){
+  let html = `<div class="result-title">💰 统计结果</div>`;
 
-  for (const uid in userData) {
-    const { total, tasks } = userData[uid];
-    const name = BOSS_NAME[uid] || uid;
+  for(const uid in userMap){
+    const { total, list } = userMap[uid];
+    const name = uid === "未识别" ? "未识别用户" : BOSS_NAME[uid] || `ID:${uid}`;
+    const taskCount = list.length;
+    const needFold = taskCount > 20;
 
     html += `
-      <div class="user-card">
-        <div class="card-head">👨‍💼 ${name}</div>
-    `;
-
-    for (const [task, { count, price }] of Object.entries(tasks)) {
-      html += `
-        <div class="card-item ${task === '未识别' ? 'unknown' : ''}">
-          <span>${task} × ${count}</span>
-          <span class="val">${count * price}M</span>
+      <div class="user-box">
+        <div class="user-head ${needFold?"fold":""}" ${needFold?`onclick="toggle('${uid}')"`:""}>
+          👨‍💼 ${name}｜${taskCount}个任务
+          ${needFold?`<span class="toggle-text" id="txt-${uid}">展开</span>`:""}
         </div>
-      `;
-    }
-
-    html += `
-        <div class="card-total">总计：${total} M</div>
+        <div class="task-list ${needFold?"hide":""}" id="list-${uid}">
+          ${list.map(item=>`
+            <div class="task-row">
+              <span class="name">${item.task}</span>
+              <span class="info">${item.loc}｜${item.detail}</span>
+              <span class="price">${item.price}M</span>
+            </div>
+          `).join("")}
+        </div>
+        <div class="user-total">报酬：${total} M</div>
       </div>
     `;
   }
 
-  html += `
-    </div>
-    <div class="total-all">📊 全部总收入：${totalIncome} M</div>
-  `;
-
-  document.getElementById('result').innerHTML = html;
+  html += `<div class="total-all">📊 总收入：${allTotal} M</div>`;
+  document.getElementById("result").innerHTML = html;
 }
 
 // 清空
-function clearAll() {
-  document.getElementById('input').value = '';
-  document.getElementById('result').innerHTML = '';
+function clearAll(){
+  document.getElementById("input").value = "";
+  document.getElementById("result").innerHTML = "";
 }
 </script>
 </body>
