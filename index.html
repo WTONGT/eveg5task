@@ -264,7 +264,7 @@ const getLoc = line => {
 
 const getUid = line => { 
   let id = line.match(/-(\d+)/)?.[1] || line.match(/^(\d+)/)?.[1] || "未识别";
-  if(id!=="未识别" && Number(id)>100) return "未识别";
+  if(id!=="未识别" && Number(id)>1000000) return "未识别";
   return id;
 };
 
