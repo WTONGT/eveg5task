@@ -2,220 +2,334 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>五级任务报酬统计</title>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
-:root {
-  --primary: #3a86ff;
-  --success: #38b000;
-  --danger: #ff5757;
-  --light: #f7f8fa;
-  --white: #fff;
-  --radius: 8px;
-  --shadow: 0 2px 8px rgba(0,0,0,0.04);
+:root{
+  /* 配色 */
+  --bg:#f8f6f2;
+  --card:#fff;
+  --border:#e8e5e0;
+  --text:#1e1e1e;
+  --text2:#6f6b65;
+  --text3:#a8a39b;
+  --blue:#5b5ea6;
+  --blue-10:#f4f3fa;
+  --gold:#d4913e;
+  --red:#d4645c;
+  --on-color:#fff;
+  --toast-bg:rgba(30,30,30,.88);
+  /* 间距（4px 基准刻度） */
+  --space-1:4px;
+  --space-2:8px;
+  --space-3:12px;
+  --space-4:16px;
+  --space-5:20px;
+  --space-6:24px;
+  --space-8:32px;
+  /* 字体大小 */
+  --fs-xs:12px;
+  --fs-sm:13px;
+  --fs-base:14px;
+  --fs-md:15px;
+  --fs-lg:16px;
+  --fs-xl:22px;
+  /* 字重 */
+  --weight-md:500;
+  --weight-semi:600;
+  --weight-bold:700;
+  /* 圆角 */
+  --radius:14px;
+  --radius-sm:9px;
+  --radius-pill:20px;
+  /* 阴影 */
+  --shadow-sm:0 1px 2px rgba(0,0,0,.03);
+  --shadow:0 1px 3px rgba(0,0,0,.05),0 4px 16px rgba(0,0,0,.04);
+  --shadow-blue:0 2px 8px rgba(91,94,166,.25);
+  --shadow-gold:0 2px 12px rgba(212,145,62,.25);
+  --ring-blue:0 0 0 3px rgba(91,94,166,.1);
+  /* 过渡 */
+  --ease:.15s ease;
+  --ease-slow:.2s ease;
+  /* 字体栈 */
+  --font:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei","Noto Sans SC",sans-serif;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:var(--bg);
+  max-width:640px;
+  margin:0 auto;
+  padding:var(--space-8) var(--space-5) 60px;
+  font-family:var(--font);
+  font-size:var(--fs-base);
+  line-height:1.65;
+  color:var(--text);
+  -webkit-font-smoothing:antialiased;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
+/* 头部 */
+.header{
+  text-align:center;
+  margin-bottom:var(--space-6);
 }
-
-body {
-  background: var(--light);
-  max-width: 700px;
-  margin: 20px auto;
-  padding: 0 12px;
-  font-size: 14px;
-  color: #2a2a2a;
-}
-
-.title {
-  text-align: center;
-  margin: 10px 0 16px;
-  font-size: 18px;
-  font-weight: 500;
+.header h1{
+  font-size:var(--fs-xl);
+  font-weight:var(--weight-bold);
+  letter-spacing:-.3px;
+  color:var(--text);
 }
 
 /* 价目表 */
-.price-card {
-  background: var(--white);
-  border-radius: var(--radius);
-  margin-bottom: 14px;
-  box-shadow: var(--shadow);
-  overflow: hidden;
+.price-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-sm);
+  margin-bottom:var(--space-4);
+  overflow:hidden;
 }
-.price-header {
-  padding: 12px 14px;
-  background: #f8f9fa;
-  display: flex;
-  justify-content: space-between;
-  cursor: pointer;
-  font-weight: 500;
+.price-grid{
+  padding:var(--space-3);
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:var(--space-1);
 }
-.price-body {
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease;
+.price-item{
+  padding:var(--space-2) var(--space-3);
+  background:var(--bg);
+  border-radius:var(--radius-sm);
+  font-size:var(--fs-sm);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  color:var(--text2);
+  cursor:pointer;
+  transition:background var(--ease),color var(--ease);
 }
-.price-body.show {
-  max-height: 1000px;
+.price-item span{font-weight:var(--weight-semi);color:var(--text);transition:color var(--ease)}
+.price-item:hover,
+.price-item.zero:hover{
+  background:var(--blue-10);
+  color:var(--blue);
 }
-.price-grid {
-  padding: 10px 12px 12px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 6px;
-}
-.price-item {
-  padding: 6px 8px;
-  background: var(--light);
-  border-radius: 5px;
-  font-size: 13px;
-  display: flex;
-  justify-content: space-between;
-}
-.price-item.zero {
-  color: var(--danger);
-}
+.price-item:hover span,
+.price-item.zero:hover span{color:var(--blue)}
+.price-item.zero,
+.price-item.zero span{color:var(--red)}
 
 /* 输入框 */
-textarea {
-  width: 100%;
-  height: 110px;
-  padding: 12px 14px;
-  border-radius: var(--radius);
-  border: 1px solid #eee;
-  font-size: 13px;
-  resize: none;
-  margin-bottom: 14px;
-  outline: none;
-  background: var(--white);
-  box-shadow: var(--shadow);
+textarea{
+  width:100%;
+  height:120px;
+  padding:var(--space-3) var(--space-4);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  font-family:var(--font);
+  font-size:var(--fs-sm);
+  line-height:1.6;
+  resize:none;
+  margin-bottom:var(--space-3);
+  outline:none;
+  background:var(--card);
+  color:var(--text);
+  transition:border-color var(--ease-slow),box-shadow var(--ease-slow);
 }
-textarea:focus {
-  border-color: var(--primary);
+textarea:focus{
+  border-color:var(--blue);
+  box-shadow:var(--ring-blue);
 }
+textarea::placeholder{color:var(--text3)}
 
 /* 按钮 */
-.btns {
-  display: flex;
-  gap: 10px;
-  justify-content: center;
-  margin-bottom: 18px;
+.btns{
+  display:flex;
+  gap:var(--space-2);
+  justify-content:center;
+  margin-bottom:var(--space-6);
 }
-button {
-  padding: 9px 20px;
-  border-radius: 6px;
-  border: none;
-  background: var(--primary);
-  color: #fff;
-  cursor: pointer;
-  font-size: 14px;
-  transition: opacity 0.2s;
+button{
+  padding:var(--space-3) var(--space-6);
+  border-radius:var(--radius-sm);
+  border:none;
+  font-family:var(--font);
+  font-size:var(--fs-base);
+  font-weight:var(--weight-md);
+  cursor:pointer;
+  transition:all var(--ease);
 }
-button:hover{
-  opacity: 0.9;
+.btn-primary{
+  background:var(--blue);
+  color:var(--on-color);
 }
-button.gray {
-  background: #86909c;
+.btn-primary:hover{
+  transform:translateY(-1px);
+  box-shadow:var(--shadow-blue);
+}
+.btn-secondary{
+  background:var(--bg);
+  color:var(--text2);
+  border:1px solid var(--border);
+}
+.btn-secondary:hover{
+  background:var(--blue-10);
+  color:var(--blue);
+  border-color:var(--blue);
 }
 
 /* 结果区域 */
-.result-title {
-  text-align: center;
-  margin-bottom: 14px;
-  font-size: 16px;
-  font-weight: 500;
+.result-title{
+  text-align:center;
+  margin-bottom:var(--space-4);
+  font-size:var(--fs-lg);
+  font-weight:var(--weight-semi);
+  color:var(--text2);
 }
 
-.user-box {
-  background: var(--white);
-  border-radius: var(--radius);
-  padding: 14px;
-  margin-bottom: 10px;
-  box-shadow: var(--shadow);
+.user-box{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow-sm);
+  padding:var(--space-4);
+  margin-bottom:var(--space-2);
+  transition:box-shadow var(--ease-slow);
 }
-.user-head {
-  font-weight: 500;
-  margin-bottom: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.user-head.fold {
-  cursor: pointer;
-}
-.toggle-text {
-  font-size: 13px;
-  color: var(--primary);
-  font-weight: normal;
+.user-box:hover{
+  box-shadow:var(--shadow);
 }
 
-.task-list {
-  overflow: hidden;
-  transition: max-height 0.3s ease;
-  max-height: 2000px;
+.user-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:var(--space-3);
 }
-.task-list.hide {
-  max-height: 0 !important;
+.user-head .user-info{
+  display:flex;
+  align-items:center;
+  gap:var(--space-2);
 }
-
-.task-row {
-  font-size: 13px;
-  padding: 7px 0;
-  border-bottom: 1px dashed #f2f2f2;
-  display: flex;
-  align-items: center;
-  gap: 8px;
+.user-head .user-name{
+  font-size:var(--fs-lg);
+  font-weight:var(--weight-bold);
+  color:var(--text);
 }
-.task-row .name { flex: 2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.task-row .info { flex: 3; color: #666; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.task-row .price { flex: 0 0 50px; text-align: right; font-weight: bold; color: var(--success); }
-
-.user-total {
-  margin-top: 10px;
-  font-weight: bold;
-  color: var(--success);
-  text-align: right;
+.user-head .user-id{
+  font-size:var(--fs-lg);
+  font-weight:var(--weight-bold);
+  color:var(--blue);
 }
 
-.total-all {
-  margin-top: 16px;
-  padding: 12px;
-  background: var(--success);
-  color: #fff;
-  text-align: center;
-  border-radius: var(--radius);
-  font-size: 16px;
-  font-weight: 500;
+/* 分享按钮（继承 button 基础样式，仅覆盖尺寸/配色/圆角） */
+.share-btn{
+  padding:var(--space-2) var(--space-3);
+  font-size:var(--fs-xs);
+  background:var(--blue-10);
+  color:var(--blue);
+  border:none;
+  border-radius:var(--radius-pill);
+  white-space:nowrap;
+  flex-shrink:0;
+}
+.share-btn:hover{
+  background:var(--blue);
+  color:var(--on-color);
+  transform:translateY(-1px);
+  box-shadow:var(--shadow-blue);
+}
+.share-btn.loading{
+  background:var(--text3);
+  color:var(--on-color);
+  pointer-events:none;
+}
+
+/* 任务列表 */
+.task-list{
+  border-top:1px solid var(--border);
+}
+.task-row{
+  font-size:var(--fs-sm);
+  padding:var(--space-2) 0;
+  border-bottom:1px solid var(--bg);
+  display:flex;
+  align-items:center;
+  gap:var(--space-2);
+}
+.task-row:last-child{border-bottom:none}
+.task-row .name{flex:2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:var(--weight-md);color:var(--text)}
+.task-row .info{flex:4;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.task-row .price{flex:0 0 56px;text-align:right;font-weight:var(--weight-semi);color:var(--gold)}
+
+/* 报酬 */
+.user-total{
+  margin-top:var(--space-3);
+  padding-top:var(--space-3);
+  border-top:1px solid var(--border);
+  font-weight:var(--weight-semi);
+  color:var(--gold);
+  text-align:right;
+  font-size:var(--fs-md);
+}
+
+/* 总计 */
+.total-all{
+  margin-top:var(--space-4);
+  padding:var(--space-4);
+  background:var(--gold);
+  color:var(--on-color);
+  text-align:center;
+  border-radius:var(--radius);
+  font-size:var(--fs-lg);
+  font-weight:var(--weight-semi);
+  box-shadow:var(--shadow-gold);
+}
+
+/* Toast */
+.toast{
+  position:fixed;
+  bottom:var(--space-6);
+  left:50%;
+  transform:translateX(-50%) translateY(80px);
+  background:var(--toast-bg);
+  color:var(--on-color);
+  padding:var(--space-2) var(--space-5);
+  border-radius:var(--radius-pill);
+  font-size:var(--fs-sm);
+  z-index:10000;
+  transition:transform var(--ease-slow),opacity var(--ease-slow);
+  opacity:0;
+  pointer-events:none;
+}
+.toast.show{
+  transform:translateX(-50%) translateY(0);
+  opacity:1;
 }
 </style>
 </head>
 
 <body>
-<div class="title">📊 五级任务报酬统计</div>
+<div class="header">
+  <h1>五级任务报酬统计</h1>
+</div>
 
 <div class="price-card">
-  <div class="price-header" onclick="togglePrice()">
-    <span>任务价目表</span>
-    <span id="arr">▼</span>
-  </div>
-  <div class="price-body" id="priceBody">
-    <div class="price-grid" id="priceGrid"></div>
-  </div>
+  <div class="price-grid" id="priceGrid"></div>
 </div>
 
 <textarea id="input" placeholder="在地点里选中所有完成的任务地点Ctrl+C，然后在这里Ctrl+V...可模糊识别数字+任务名称关键字"></textarea>
 <div class="btns">
-  <button onclick="calc()">提交统计</button>
-  <button class="gray" onclick="clearAll()">清空内容</button>
+  <button class="btn-primary" onclick="calc()">开始统计</button>
+  <button class="btn-secondary" onclick="clearAll()">清空</button>
 </div>
 
 <div id="result"></div>
 
+<div class="toast" id="toast"></div>
+
 <script>
-// ======================任务识别配置
+/* ====================== 任务识别配置 ====================== */
+// 任务名 → 报酬(M)
 const TASK_PRICE = {
   "繁殖设施":15,"天使的愤怒":20,"净化的火焰":20,"开拓号":20,
   "清理门户":20,"地平线上的萨沙":20,"灭龙行动":20,"萨沙取物":20,
@@ -223,6 +337,7 @@ const TASK_PRICE = {
   "解放矿工A":25,"解放矿工C":25,"袭击护航队A":35,"袭击护航队C":40,
   "地点地点":25,"斩龙行动":0
 };
+// 关键字 → 任务名（模糊匹配用，大小写不敏感的别名需预先列出）
 const KEY_MAP = {
   "繁殖":"繁殖设施","设施":"繁殖设施","天使":"天使的愤怒","愤怒":"天使的愤怒",
   "净化":"净化的火焰","火焰":"净化的火焰","开拓":"开拓号","清理":"清理门户",
@@ -242,60 +357,47 @@ const KEY_MAP = {
   "护航队":"袭击护航队A","袭击":"袭击护航队A","护航":"袭击护航队A",
   "地点":"地点地点","斩龙":"斩龙行动"
 };
+// 老板 UID → 备注名
 const BOSS_NAME = {
-  "44556":"赵六"
+  "9527":"名称占用"
 };
 
-// ====================== 工具函数
-const getTask = line => { 
-  for(const [k,t] of Object.entries(KEY_MAP)) {
+/* ====================== 行解析工具 ====================== */
+// 按关键字长度降序排序，长关键字优先匹配
+// 否则 "袭击C" 会先命中 "袭击" 导致识别为袭击护航队A 而非 C
+const KEY_MAP_SORTED = Object.entries(KEY_MAP).sort((a,b) => b[0].length - a[0].length);
+
+const LOCS = ["埃格斯","乌法兰特","达斯顿斯","卡维因"];
+
+// 从一行文本中提取任务名（模糊匹配，长关键字优先）
+const getTask = line => {
+  for(const [k,t] of KEY_MAP_SORTED){
     if(line.includes(k)) return t;
   }
   return "未识别";
 };
 
-const getLoc = line => { 
-  if(line.includes("埃格斯"))return"埃格斯";
-  if(line.includes("乌法兰特"))return"乌法兰特";
-  if(line.includes("达斯顿斯"))return"达斯顿斯";
-  if(line.includes("卡维因"))return"卡维因";
-  return"未知";
+// 提取地点名
+const getLoc = line => LOCS.find(l => line.includes(l)) || "未知";
+
+// 提取老板 UID，过滤过大的数字避免误判
+const getUid = line => {
+  const id = line.match(/-(\d+)/)?.[1] || line.match(/^(\d+)/)?.[1] || "未识别";
+  return (id !== "未识别" && Number(id) > 1000000) ? "未识别" : id;
 };
 
-const getUid = line => { 
-  let id = line.match(/-(\d+)/)?.[1] || line.match(/^(\d+)/)?.[1] || "未识别";
-  if(id!=="未识别" && Number(id)>1000000) return "未识别";
-  return id;
-};
-
-// ====================== 初始化
-window.onload = () => {
-  const g = document.getElementById("priceGrid");
-  g.innerHTML = Object.entries(TASK_PRICE).map(([n,p])=>
-    `<div class="price-item ${p===0?"zero":""}">${n}<span>${p}M</span></div>`
+/* ====================== 价目表初始化 ====================== */
+// 脚本在 body 末尾，DOM 已就绪，无需等待 window.onload
+(() => {
+  document.getElementById("priceGrid").innerHTML = Object.entries(TASK_PRICE).map(([n,p])=>
+    `<div class="price-item ${p===0?"zero":""}" onclick="copyTaskName('${n}')">${n}<span>${p}M</span></div>`
   ).join("");
-  togglePrice(); // 默认展开价目表
-};
+})();
 
-// 价目表展开/收起
-function togglePrice(){
-  const b = document.getElementById("priceBody");
-  b.classList.toggle("show");
-  document.getElementById("arr").textContent = b.classList.contains("show")?"▲":"▼";
-}
-
-// 任务列表折叠
-function toggle(id){
-  const list = document.getElementById("list-"+id);
-  const text = document.getElementById("txt-"+id);
-  list.classList.toggle("hide");
-  text.textContent = list.classList.contains("hide")?"展开":"收起";
-}
-
-// 计算统计
+/* ====================== 统计计算 ====================== */
 function calc(){
   const text = document.getElementById("input").value.trim();
-  if(!text) {
+  if(!text){
     alert("请粘贴任务地点数据后再提交！");
     return;
   }
@@ -310,10 +412,7 @@ function calc(){
     const detail = line.split("*")[3] || "无";
     const price = TASK_PRICE[task] || 0;
 
-    if(!user[uid]) {
-      user[uid] = { total:0, list:[] };
-    }
-    
+    if(!user[uid]) user[uid] = { total:0, list:[] };
     user[uid].list.push({ task, loc, detail, price });
     user[uid].total += price;
     totalAll += price;
@@ -322,23 +421,29 @@ function calc(){
   renderResult(user, totalAll);
 }
 
-// 渲染结果
+/* ====================== 结果渲染 ====================== */
 function renderResult(userMap, allTotal){
-  let html = `<div class="result-title">💰 统计结果</div>`;
+  let html = `<div class="result-title">统计结果</div>`;
 
   for(const uid in userMap){
     const { total, list } = userMap[uid];
-    const name = uid === "未识别" ? "未识别用户" : BOSS_NAME[uid] || `ID:${uid}`;
+    const name = BOSS_NAME[uid] || (uid === "未识别" ? "未识别" : "");
     const taskCount = list.length;
-    const needFold = taskCount > 20;
+    const uidSafe = uid.replace(/[^a-zA-Z0-9\u4e00-\u9fa5]/g, '_');
+    // 双重 JSON.stringify：内层序列化对象，外层转义为安全的 JS 字符串字面量
+    // 以便安全嵌入 onclick 属性（避免引号/换行破坏属性解析）
+    const cardData = JSON.stringify(JSON.stringify({ name: name || uid, total, list, taskCount }));
 
     html += `
-      <div class="user-box">
-        <div class="user-head ${needFold?"fold":""}" ${needFold?`onclick="toggle('${uid}')"`:""}>
-          👨‍💼 ${name}｜${taskCount}个任务
-          ${needFold?`<span class="toggle-text" id="txt-${uid}">展开</span>`:""}
+      <div class="user-box" id="box-${uidSafe}">
+        <div class="user-head">
+          <div class="user-info">
+            ${name ? `<span class="user-name">${name}</span>` : ""}
+            <span class="user-id">#${uid}</span>
+          </div>
+          <button class="share-btn" onclick='shareCard("${uidSafe}", ${cardData})'>截图分享</button>
         </div>
-        <div class="task-list ${needFold?"hide":""}" id="list-${uid}">
+        <div class="task-list" id="list-${uidSafe}">
           ${list.map(item=>`
             <div class="task-row">
               <span class="name">${item.task}</span>
@@ -352,11 +457,116 @@ function renderResult(userMap, allTotal){
     `;
   }
 
-  html += `<div class="total-all">📊 总收入：${allTotal} M</div>`;
+  html += `<div class="total-all">总收入：${allTotal} M</div>`;
   document.getElementById("result").innerHTML = html;
 }
 
-// 清空
+/* ====================== 截图分享 ====================== */
+// 优先写入剪贴板（方便 QQ 粘贴），失败则回退下载图片
+function shareCard(uidSafe, dataStr){
+  const data = JSON.parse(dataStr);
+  const box = document.getElementById("box-" + uidSafe);
+  if(!box) return;
+
+  // html2canvas 未加载（CDN 失败）时给出友好提示
+  if(typeof html2canvas !== "function"){
+    showToast("截图组件未加载，请刷新页面重试");
+    return;
+  }
+
+  const btn = box.querySelector(".share-btn");
+
+  // 截图前隐藏分享按钮，避免出现在图片中；无论成功失败都需恢复
+  const restoreBtn = () => {
+    btn.style.visibility = "";
+    btn.classList.remove("loading");
+    btn.textContent = "截图分享";
+  };
+  btn.classList.add("loading");
+  btn.textContent = "生成中...";
+  btn.style.visibility = "hidden";
+
+  // 剪贴板不可用时回退为下载图片
+  const downloadCanvas = canvas => {
+    const link = document.createElement("a");
+    link.download = `${data.name}_任务结算单.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+    showToast("剪贴板失败，已下载图片");
+  };
+
+  html2canvas(box, {
+    backgroundColor: "#ffffff",
+    scale: 2,
+    useCORS: true,
+    logging: false
+  }).then(canvas => {
+    restoreBtn();
+    canvas.toBlob(blob => {
+      // ClipboardItem 在部分浏览器（如 Firefox 旧版）不存在
+      // 需同步拦截避免 ReferenceError 逃逸 catch
+      try {
+        if(!navigator.clipboard?.write || typeof ClipboardItem === "undefined"){
+          throw new Error("clipboard unsupported");
+        }
+        navigator.clipboard.write([new ClipboardItem({ "image/png": blob })])
+          .then(() => showToast("已复制到剪贴板，可直接粘贴到QQ分享"))
+          .catch(() => downloadCanvas(canvas));
+      } catch {
+        downloadCanvas(canvas);
+      }
+    });
+  }).catch(() => {
+    restoreBtn();
+    showToast("截图生成失败，请重试");
+  });
+}
+
+/* ====================== 文本复制 ====================== */
+// 优先 Clipboard API，失败回退 execCommand
+function copyText(text, successMsg){
+  if(navigator.clipboard?.writeText){
+    navigator.clipboard.writeText(text)
+      .then(() => showToast(successMsg))
+      .catch(() => fallbackCopyText(text, successMsg));
+  } else {
+    fallbackCopyText(text, successMsg);
+  }
+}
+
+// 价目表点击复制任务名
+function copyTaskName(name){
+  copyText(name, `已复制「${name}」`);
+}
+
+function fallbackCopyText(text, successMsg){
+  const ta = document.createElement("textarea");
+  ta.value = text;
+  ta.style.position = "fixed";
+  ta.style.opacity = "0";
+  document.body.appendChild(ta);
+  ta.select();
+  try {
+    document.execCommand("copy");
+    showToast(successMsg);
+  } catch {
+    showToast("复制失败，请手动复制");
+  }
+  document.body.removeChild(ta);
+}
+
+/* ====================== Toast 提示 ====================== */
+// 防抖：重复触发时重置计时，避免提前消失
+let toastTimer = null;
+function showToast(message){
+  const toast = document.getElementById("toast");
+  toast.textContent = message;
+  toast.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove("show"), 2000);
+}
+
+/* ====================== 清空 ====================== */
 function clearAll(){
   document.getElementById("input").value = "";
   document.getElementById("result").innerHTML = "";
