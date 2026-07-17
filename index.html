@@ -145,11 +145,10 @@ textarea:focus{
 }
 textarea::placeholder{color:var(--text3)}
 
-/* 右上角齿轮设置 */
-.gear-btn{
+/* 右上角齿轮设置 + 说明按钮 */
+.gear-btn,.help-btn{
   position:absolute;
   top:16px;
-  right:var(--space-5);
   width:30px;
   height:30px;
   border-radius:50%;
@@ -166,10 +165,17 @@ textarea::placeholder{color:var(--text3)}
   user-select:none;
   transition:color var(--ease);
 }
-.gear-btn:hover{
+.gear-btn svg,.help-btn svg{
+  display:block;
+  width:18px;
+  height:18px;
+}
+.gear-btn{ right:var(--space-5); }
+.help-btn{ right:calc(var(--space-5) + 34px); }
+.gear-btn:hover,.help-btn:hover{
   color:var(--blue);
 }
-.gear-pop{
+.gear-pop,.help-pop{
   position:absolute;
   top:62px;
   right:var(--space-5);
@@ -182,8 +188,18 @@ textarea::placeholder{color:var(--text3)}
   z-index:9999;
   display:none;
 }
-.gear-pop.show{ display:block; }
-.gear-pop .pop-title{
+.gear-pop.show,.help-pop.show{ display:block; }
+.help-pop{ width:260px; }
+.help-pop .help-list{
+  font-size:var(--fs-sm);
+  color:var(--text2);
+  line-height:1.7;
+  padding-left:var(--space-4);
+  margin:0;
+}
+.help-pop .help-list li{ margin-bottom:var(--space-1); }
+.gear-pop .pop-title,
+.help-pop .pop-title{
   font-size:var(--fs-sm);
   font-weight:var(--weight-semi);
   color:var(--text);
@@ -398,8 +414,24 @@ button{
   <h1>五级任务报酬统计</h1>
 </div>
 
+<!-- 右上角说明按钮：点击展开功能说明 -->
+<div class="help-btn" id="helpBtn" onclick="toggleHelp()" title="功能说明" aria-label="功能说明">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+</div>
+<div class="help-pop" id="helpPop">
+  <div class="pop-title">功能说明</div>
+  <ul class="help-list">
+    <li>点上方价目表任务，可一键复制任务名</li>
+    <li>在齿轮里填「我的编号」，复制时会自动带上（如 123繁殖设施）</li>
+    <li>粘贴任务地点数据后点「开始统计」，自动汇总各老板报酬</li>
+    <li>点结算卡片或「总收入」可截图，直接粘贴到QQ分享</li>
+  </ul>
+</div>
+
 <!-- 右上角齿轮：点击展开「我的编号」设置 -->
-<div class="gear-btn" id="gearBtn" onclick="toggleGear()" title="设置">⚙︎</div>
+<div class="gear-btn" id="gearBtn" onclick="toggleGear()" title="设置" aria-label="设置">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+</div>
 <div class="gear-pop" id="gearPop">
   <div class="pop-title">我的编号</div>
   <input id="myId" class="myid-input" placeholder="如 123（留空则只复制任务名）" />
@@ -500,17 +532,24 @@ function getMyId(){
   return (document.getElementById("myId").value || "").trim();
 }
 
-/* ====================== 右上角齿轮设置面板 ====================== */
+/* ====================== 右上角齿轮设置 / 说明面板 ====================== */
 function toggleGear(){
+  document.getElementById("helpPop").classList.remove("show"); // 互斥：打开齿轮先关说明
   document.getElementById("gearPop").classList.toggle("show");
 }
-// 点击齿轮/面板以外区域时自动收起
+function toggleHelp(){
+  document.getElementById("gearPop").classList.remove("show"); // 互斥：打开说明先关齿轮
+  document.getElementById("helpPop").classList.toggle("show");
+}
+// 点击按钮/面板以外区域时自动收起（两个面板统一处理）
 document.addEventListener("click", e => {
-  const pop = document.getElementById("gearPop");
-  const btn = document.getElementById("gearBtn");
-  if(pop.classList.contains("show") && !pop.contains(e.target) && !btn.contains(e.target)){
-    pop.classList.remove("show");
-  }
+  [["gearPop","gearBtn"],["helpPop","helpBtn"]].forEach(([popId,btnId]) => {
+    const pop = document.getElementById(popId);
+    const btn = document.getElementById(btnId);
+    if(pop.classList.contains("show") && !pop.contains(e.target) && !btn.contains(e.target)){
+      pop.classList.remove("show");
+    }
+  });
 }, true);
 
 /* ====================== 统计计算 ====================== */
