@@ -57,6 +57,7 @@
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 body{
+  position:relative;
   background:var(--bg);
   max-width:640px;
   margin:0 auto;
@@ -143,6 +144,74 @@ textarea:focus{
   box-shadow:var(--ring-blue);
 }
 textarea::placeholder{color:var(--text3)}
+
+/* 右上角齿轮设置 */
+.gear-btn{
+  position:absolute;
+  top:16px;
+  right:var(--space-5);
+  width:30px;
+  height:30px;
+  border-radius:50%;
+  background:transparent;
+  border:none;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  z-index:9999;
+  font-size:16px;
+  line-height:1;
+  color:var(--text3);
+  user-select:none;
+  transition:color var(--ease);
+}
+.gear-btn:hover{
+  color:var(--blue);
+}
+.gear-pop{
+  position:absolute;
+  top:62px;
+  right:var(--space-5);
+  width:240px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  box-shadow:var(--shadow);
+  padding:var(--space-3) var(--space-4);
+  z-index:9999;
+  display:none;
+}
+.gear-pop.show{ display:block; }
+.gear-pop .pop-title{
+  font-size:var(--fs-sm);
+  font-weight:var(--weight-semi);
+  color:var(--text);
+  margin-bottom:var(--space-2);
+}
+.myid-input{
+  width:100%;
+  height:40px;
+  padding:0 var(--space-3);
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  font-family:var(--font);
+  font-size:var(--fs-sm);
+  background:var(--card);
+  color:var(--text);
+  outline:none;
+  transition:border-color var(--ease-slow),box-shadow var(--ease-slow);
+}
+.myid-input:focus{
+  border-color:var(--blue);
+  box-shadow:var(--ring-blue);
+}
+.gear-pop .pop-tip{
+  font-size:var(--fs-xs);
+  color:var(--text3);
+  margin-top:var(--space-2);
+  line-height:1.5;
+}
 
 /* 按钮 */
 .btns{
@@ -329,6 +398,14 @@ button{
   <h1>五级任务报酬统计</h1>
 </div>
 
+<!-- 右上角齿轮：点击展开「我的编号」设置 -->
+<div class="gear-btn" id="gearBtn" onclick="toggleGear()" title="设置">⚙︎</div>
+<div class="gear-pop" id="gearPop">
+  <div class="pop-title">我的编号</div>
+  <input id="myId" class="myid-input" placeholder="如 123（留空则只复制任务名）" />
+  <div class="pop-tip">点任务复制时会自动带上此编号，已用本地记忆保存</div>
+</div>
+
 <div class="price-card">
   <div class="price-grid" id="priceGrid"></div>
 </div>
@@ -409,6 +486,32 @@ const getUid = line => {
     `<div class="price-item ${p===0?"zero":""}" onclick="copyTaskName('${n}')">${n}<span class="p">${p}M</span></div>`
   ).join("");
 })();
+
+/* ====================== 「我的编号」读写（复制任务时带上） ====================== */
+// 文本框填一次后用 localStorage 记住，刷新/下次打开仍生效；留空则只复制任务名
+(() => {
+  const input = document.getElementById("myId");
+  input.value = localStorage.getItem("eveg5_myId") || "";
+  input.addEventListener("input", () => {
+    localStorage.setItem("eveg5_myId", input.value.trim());
+  });
+})();
+function getMyId(){
+  return (document.getElementById("myId").value || "").trim();
+}
+
+/* ====================== 右上角齿轮设置面板 ====================== */
+function toggleGear(){
+  document.getElementById("gearPop").classList.toggle("show");
+}
+// 点击齿轮/面板以外区域时自动收起
+document.addEventListener("click", e => {
+  const pop = document.getElementById("gearPop");
+  const btn = document.getElementById("gearBtn");
+  if(pop.classList.contains("show") && !pop.contains(e.target) && !btn.contains(e.target)){
+    pop.classList.remove("show");
+  }
+}, true);
 
 /* ====================== 统计计算 ====================== */
 function calc(){
@@ -581,9 +684,16 @@ function copyText(text, successMsg){
   }
 }
 
-// 价目表点击复制任务名
+// 价目表点击复制任务名（自动带上「我的编号」）
 function copyTaskName(name){
-  copyText(name, `已复制「${name}」`);
+  const id = getMyId();
+  // 复制格式：编号直接连任务名（如 "9527繁殖设施"）。想换格式改这一行即可，例如：
+  //   `#${id}${name}`          编号带井号在前
+  //   `${name}${id}`           任务名在前、编号在后
+  //   `${name}（${id}）`       编号放括号
+  const text = id ? `${id}${name}` : name;
+  const msg = id ? `已复制「${name}」并带上编号 ${id}` : `已复制「${name}」`;
+  copyText(text, msg);
 }
 
 function fallbackCopyText(text, successMsg){
